@@ -1,0 +1,7 @@
+{
+    "A": ["MHC alpha"], 
+    "B": ["MHC beta", "Beta-2 microglobulin"],
+    "C": ["Peptide"],
+    "D": ["TCR alpha"],
+    "E": ["TCR beta"]
+}

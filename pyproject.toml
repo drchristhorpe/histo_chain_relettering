@@ -1,0 +1,26 @@
+[project]
+name = "histo-chain-relettering"
+version = "0.1.0"
+description = "Reletter a structure file's chains to the standardized single-letter biological-role scheme."
+readme = "README.md"
+authors = [
+    { name = "Chris Thorpe", email = "33100149+drchristhorpe@users.noreply.github.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "biopython>=1.85",
+    "click>=8.1",
+    "rich>=13.7",
+]
+
+[project.scripts]
+histo-chain-relettering = "histo_chain_relettering.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.9.28,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
