@@ -1,6 +1,6 @@
 [project]
 name = "histo-chain-relettering"
-version = "0.1.0"
+version = "0.2.0"
 description = "Reletter a structure file's chains to the standardized single-letter biological-role scheme."
 readme = "README.md"
 authors = [

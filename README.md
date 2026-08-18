@@ -4,17 +4,27 @@ Reletter a 3D biological structure file's (PDB/mmCIF) chains to the
 family's standardized single-letter scheme, defined in
 [`chain_letters.json`](src/histo_chain_relettering/data/chain_letters.json):
 
-| Letter | Role(s) |
+| Chain type | Letter(s) |
 |---|---|
-| `A` | MHC alpha |
-| `B` | MHC beta, Beta-2 microglobulin |
-| `C` | Peptide |
-| `D` | TCR alpha |
-| `E` | TCR beta |
+| `class_i_alpha`, `truncated_class_i_alpha`, `hybrid_class_i_alpha`, `mr1`, `cd1d`, … | `A` |
+| `beta2m` | `B` |
+| `peptide` | `C` |
+| `tcr_alpha`, `ab_heavy`, `nanobody` | `D` |
+| `tcr_beta`, `ab_light` | `E` |
+| `cd8a`, `cd8b` | `F`, `G` |
+| `nkg2a`, `nkg2d`, `ly49a`, `cd94`, `kir` | `K`, `L` |
 
-You state which biological role each source chain plays; the tool
-resolves that role to its standardized letter and relabels the chain in
-two steps to avoid id collisions (see "Notes and limitations").
+56 chain types in all. You state which **chain type** each source chain
+is; the tool resolves that to a letter and relabels the chain in two
+steps to avoid id collisions (see "Notes and limitations").
+
+The value is a *list* because an assembly can hold more than one chain of
+a type — two CD8 alphas, four copies of a trimer. The **nth chain of a
+type takes the nth letter**, allocated in the order the chains appear in
+the file so the same file always gives the same answer.
+
+Chain types are the vocabulary the histo pipelines already use, so a
+caller that has a `chain_types.json` can pass it through unchanged.
 
 Built on [Biopython](https://biopython.org/), it ships as:
 
@@ -36,11 +46,11 @@ pip install .
 ## CLI usage
 
 ```
-histo-chain-relettering FILENAME --map CHAIN=ROLE [--map CHAIN=ROLE ...] [--format pdb|cif] [--output PATH]
+histo-chain-relettering FILENAME --map CHAIN=CHAIN_TYPE [--map CHAIN=CHAIN_TYPE ...] [--format pdb|cif] [--output PATH]
 ```
 
 - `FILENAME` — a `.cif`/`.mmcif` or `.pdb`/`.ent` structure file.
-- `--map`, `-m` (required, repeatable) — `CHAIN=ROLE`, e.g. `-m P=Peptide`.
+- `--map`, `-m` (required, repeatable) — `CHAIN=CHAIN_TYPE`, e.g. `-m P=peptide`.
   `ROLE` must match one of the role strings in `chain_letters.json`
   (case-insensitive). Chains not mentioned are left unchanged.
 - `--format`, `-f` — output structure format, `pdb` or `cif` (default:

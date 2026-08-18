@@ -14,11 +14,11 @@ from histo_chain_relettering import (
 FIXTURE = Path(__file__).parent / "fixtures" / "8gvi_1_aligned.cif"
 
 FULL_ROLES = {
-    "H": "MHC alpha",
-    "L": "Beta-2 microglobulin",
-    "P": "Peptide",
-    "A": "TCR alpha",
-    "B": "TCR beta",
+    "H": "class_i_alpha",
+    "L": "beta2m",
+    "P": "peptide",
+    "A": "tcr_alpha",
+    "B": "tcr_beta",
 }
 
 # {original chain id: residue count}, confirmed by inspection of the fixture.
@@ -39,28 +39,34 @@ def test_load_structure_missing_file_raises():
         load_structure("does_not_exist.cif")
 
 
-def test_load_chain_letters_bundled_scheme():
+def test_the_bundled_scheme_is_keyed_by_chain_type():
+    """Keyed by chain type, not by letter, and the value is a list because a
+    complex can hold more than one chain of a type."""
     scheme = load_chain_letters()
-    assert scheme == {
-        "A": ["MHC alpha"],
-        "B": ["MHC beta", "Beta-2 microglobulin"],
-        "C": ["Peptide"],
-        "D": ["TCR alpha"],
-        "E": ["TCR beta"],
-    }
+
+    assert scheme["class_i_alpha"] == ["A"]
+    assert scheme["beta2m"] == ["B"]
+    assert scheme["peptide"] == ["C"]
+    assert scheme["tcr_alpha"] == ["D"]
+    assert scheme["tcr_beta"] == ["E"]
+    # Types that can appear twice carry a letter for each.
+    assert len(scheme["cd8a"]) == 2
 
 
-def test_resolve_role_exact_and_case_insensitive():
+def test_letters_for_returns_the_whole_list():
     reletterer = ChainReletterer(FIXTURE)
-    assert reletterer.resolve_role("Peptide") == "C"
-    assert reletterer.resolve_role("peptide") == "C"
-    assert reletterer.resolve_role("  TCR alpha  ") == "D"
+
+    assert reletterer.letters_for("peptide") == ["C"]
+    assert reletterer.letters_for("cd8a") == ["F", "G"]
 
 
-def test_resolve_unknown_role_raises_with_valid_list():
+def test_an_unknown_chain_type_raises():
+    """Chain types are slugs from a fixed vocabulary, so this is a caller bug
+    rather than something to normalise away."""
     reletterer = ChainReletterer(FIXTURE)
-    with pytest.raises(RelettererError, match="Unknown chain role"):
-        reletterer.resolve_role("Nonsense role")
+
+    with pytest.raises(RelettererError, match="Unknown chain type"):
+        reletterer.letters_for("Nonsense role")
 
 
 def test_full_mapping_resolves_and_relabels():
@@ -82,7 +88,7 @@ def test_full_mapping_resolves_and_relabels():
 
 def test_partial_mapping_leaves_others_untouched():
     reletterer = ChainReletterer(FIXTURE)
-    result = reletterer.reletter({"P": "Peptide"})
+    result = reletterer.reletter({"P": "peptide"})
 
     assert result.mapping == {"P": "C"}
     assert result.unmapped_chains == ["A", "B", "H", "L"]
@@ -96,22 +102,64 @@ def test_partial_mapping_leaves_others_untouched():
 
 def test_missing_source_chain_raises():
     reletterer = ChainReletterer(FIXTURE)
-    with pytest.raises(RelettererError, match="No such chain 'Z'"):
-        reletterer.reletter({"Z": "Peptide"})
+    with pytest.raises(RelettererError, match="No such chain"):
+        reletterer.reletter({"Z": "peptide"})
 
 
-def test_two_sources_same_target_letter_raises():
+def test_two_chain_types_sharing_a_letter_raises():
+    """Two chains of the *same* type is normal — they take successive letters.
+    Two different types that both want `D` is a real conflict."""
     reletterer = ChainReletterer(FIXTURE)
+
     with pytest.raises(RelettererError, match="resolve to the same target letter"):
-        reletterer.reletter({"H": "MHC beta", "L": "Beta-2 microglobulin"})
+        reletterer.reletter({"H": "tcr_alpha", "L": "ab_heavy"})
+
+
+def test_repeated_chain_types_take_successive_letters():
+    """The reason the scheme stores a list at all."""
+    reletterer = ChainReletterer(FIXTURE)
+
+    result = reletterer.reletter({"H": "cd8a", "L": "cd8a", "P": "peptide"})
+
+    assert sorted(result.mapping.values()) == ["C", "F", "G"]
+    assert result.mapping["P"] == "C"
+
+
+def test_running_out_of_letters_raises():
+    reletterer = ChainReletterer(FIXTURE)
+
+    with pytest.raises(RelettererError, match="only 1 letter"):
+        reletterer.reletter({"H": "peptide", "L": "peptide"})
+
+
+def test_records_are_the_published_shape():
+    reletterer = ChainReletterer(FIXTURE)
+
+    records = reletterer.reletter(FULL_ROLES).records
+
+    assert records[0] == {
+        "chain_type": "class_i_alpha",
+        "consistent_chain_letter": "A",
+        "pdb_chain_letter": "H",
+    }
+    assert [r["consistent_chain_letter"] for r in records] == ["A", "B", "C", "D", "E"]
+
+
+def test_allocation_does_not_depend_on_mapping_order():
+    """Letters are allocated in *file* order, so the same file always gives the
+    same answer however the caller happened to build its dict."""
+    forward = ChainReletterer(FIXTURE).reletter({"H": "cd8a", "L": "cd8a"})
+    reverse = ChainReletterer(FIXTURE).reletter({"L": "cd8a", "H": "cd8a"})
+
+    assert forward.mapping == reverse.mapping
 
 
 def test_target_collides_with_unmapped_chain_raises():
     reletterer = ChainReletterer(FIXTURE)
-    # H -> "MHC alpha" -> target "A", but source chain "A" (TCR alpha) is
+    # H -> "class_i_alpha" -> target "A", but source chain "A" (TCR alpha) is
     # deliberately left unmapped -> would collide.
     with pytest.raises(RelettererError, match="would collide with chain"):
-        reletterer.reletter({"H": "MHC alpha"})
+        reletterer.reletter({"H": "class_i_alpha"})
 
 
 def test_reletter_chains_convenience_function():

@@ -4,6 +4,32 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.2.0
+
+### Changed
+
+- **`chain_letters.json` is keyed by chain type, not by letter.** Was
+  `{"A": ["MHC alpha"]}` over 5 letters and prose role names; now
+  `{"class_i_alpha": ["A"]}` over 56 chain types, the vocabulary the histo
+  pipelines already speak. A caller with a `chain_types.json` can pass it
+  through unchanged instead of translating at the boundary.
+- `ChainReletterer.resolve_role(role)` -> `letters_for(chain_type)`, returning
+  the whole list rather than one letter.
+- `reletter()` takes `{chain_id: chain_type}`; `RelabelResult.roles` is now
+  `.chain_types`.
+- CLI `--map CHAIN=ROLE` -> `--map CHAIN=CHAIN_TYPE`.
+
+### Added
+
+- **Multi-copy allocation.** The nth chain of a type takes the nth letter, in
+  file order. An assembly with two CD8 alphas gets `F` and `G`; previously a
+  second chain of a type was a collision error.
+- `RelabelResult.records` — the mapping as
+  `{chain_type, consistent_chain_letter, pdb_chain_letter}` per chain, the
+  shape the histo pipelines publish.
+- `load_chain_letters(path)` and `ChainReletterer(path, chain_letters_path)`
+  accept an external scheme, so a pipeline can supply its own.
+
 ## [Unreleased]
 
 ## [0.1.0] - 2026-07-07

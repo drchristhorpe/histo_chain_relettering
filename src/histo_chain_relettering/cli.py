@@ -14,19 +14,19 @@ console = Console()
 
 
 def _parse_mapping(entries: tuple[str, ...]) -> dict[str, str]:
-    roles: dict[str, str] = {}
+    chain_types: dict[str, str] = {}
     for entry in entries:
         if "=" not in entry:
-            raise click.BadParameter(f"expected CHAIN=ROLE, got {entry!r}", param_hint="'--map'")
-        chain_id, role = entry.split("=", 1)
+            raise click.BadParameter(f"expected CHAIN=CHAIN_TYPE, got {entry!r}", param_hint="'--map'")
+        chain_id, chain_type = entry.split("=", 1)
         chain_id = chain_id.strip()
-        role = role.strip()
-        if not chain_id or not role:
-            raise click.BadParameter(f"expected CHAIN=ROLE, got {entry!r}", param_hint="'--map'")
-        if chain_id in roles:
+        chain_type = chain_type.strip()
+        if not chain_id or not chain_type:
+            raise click.BadParameter(f"expected CHAIN=CHAIN_TYPE, got {entry!r}", param_hint="'--map'")
+        if chain_id in chain_types:
             raise click.BadParameter(f"chain {chain_id!r} mapped more than once", param_hint="'--map'")
-        roles[chain_id] = role
-    return roles
+        chain_types[chain_id] = chain_type
+    return chain_types
 
 
 @click.command()
@@ -37,9 +37,9 @@ def _parse_mapping(entries: tuple[str, ...]) -> dict[str, str]:
     "mapping",
     multiple=True,
     required=True,
-    metavar="CHAIN=ROLE",
-    help="Source chain id to standardized biological role, e.g. -m P=Peptide. "
-    "Repeatable. ROLE must match an entry in chain_letters.json (case-insensitive). "
+    metavar="CHAIN=CHAIN_TYPE",
+    help="Source chain id to chain type, e.g. -m P=peptide. "
+    "Repeatable. CHAIN_TYPE must be a key of chain_letters.json. "
     "Chains not mapped are left unchanged.",
 )
 @click.option(
@@ -62,11 +62,11 @@ def main(filename: Path, mapping: tuple[str, ...], output_format: str | None, ou
 
     FILENAME is a .cif/.mmcif or .pdb/.ent structure file.
     """
-    roles = _parse_mapping(mapping)
+    chain_types = _parse_mapping(mapping)
 
     try:
         reletterer = ChainReletterer(filename)
-        result = reletterer.reletter(roles)
+        result = reletterer.reletter(chain_types)
     except RelettererError as exc:
         raise click.ClickException(str(exc)) from exc
 
@@ -76,10 +76,10 @@ def main(filename: Path, mapping: tuple[str, ...], output_format: str | None, ou
 
     table = Table(title=f"Chain relettering: {filename}")
     table.add_column("source chain")
-    table.add_column("role")
+    table.add_column("chain type")
     table.add_column("target letter")
-    for source_id, role in result.roles.items():
-        table.add_row(source_id, role, result.mapping[source_id])
+    for source_id, chain_type in result.chain_types.items():
+        table.add_row(source_id, chain_type, result.mapping[source_id])
     console.print(table)
 
     if result.unmapped_chains:

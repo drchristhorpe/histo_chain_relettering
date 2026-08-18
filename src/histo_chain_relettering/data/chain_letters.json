@@ -1,7 +1,179 @@
 {
-    "A": ["MHC alpha"], 
-    "B": ["MHC beta", "Beta-2 microglobulin"],
-    "C": ["Peptide"],
-    "D": ["TCR alpha"],
-    "E": ["TCR beta"]
+    "class_i_alpha": [
+        "A"
+    ],
+    "truncated_class_i_alpha": [
+        "A"
+    ],
+    "hybrid_class_i_alpha": [
+        "A"
+    ],
+    "beta2m": [
+        "B"
+    ],
+    "class_ii_alpha": [
+        "A"
+    ],
+    "class_ii_beta": [
+        "B"
+    ],
+    "peptide": [
+        "C"
+    ],
+    "pre_tcr_beta": [
+        "E"
+    ],
+    "scvf_alpha": [
+        "D"
+    ],
+    "scvf_beta": [
+        "E"
+    ],
+    "cd8a": [
+        "F",
+        "G"
+    ],
+    "cd8b": [
+        "F",
+        "G"
+    ],
+    "tcr_delta": [
+        "D"
+    ],
+    "tcr_gamma": [
+        "E"
+    ],
+    "tcr_alpha": [
+        "D"
+    ],
+    "tcr_beta": [
+        "E"
+    ],
+    "chimeric_tcr_alpha": [
+        "D"
+    ],
+    "chimeric_tcr_beta": [
+        "E"
+    ],
+    "ab_heavy": [
+        "D"
+    ],
+    "ab_light": [
+        "E"
+    ],
+    "tapbpr": [
+        "H"
+    ],
+    "tapasin": [
+        "H"
+    ],
+    "erp57": [
+        "I"
+    ],
+    "calreticulin": [
+        "J"
+    ],
+    "nkg2a": [
+        "K",
+        "L"
+    ],
+    "nkg2d": [
+        "K",
+        "L"
+    ],
+    "ly49a": [
+        "K",
+        "L"
+    ],
+    "ly49c": [
+        "K",
+        "L"
+    ],
+    "cd94": [
+        "K",
+        "L"
+    ],
+    "kir": [
+        "K"
+    ],
+    "kir3": [
+        "K"
+    ],
+    "lir1": [
+        "L"
+    ],
+    "lirb1": [
+        "L"
+    ],
+    "lir2": [
+        "L"
+    ],
+    "mr1": [
+        "A"
+    ],
+    "h2_m3": [
+        "A"
+    ],
+    "h2_t3": [
+        "A"
+    ],
+    "gaga_yf1": [
+        "A"
+    ],
+    "cd1a": [
+        "A"
+    ],
+    "cd1b": [
+        "A"
+    ],
+    "cd1c": [
+        "A"
+    ],
+    "cd1d": [
+        "A"
+    ],
+    "cd1e": [
+        "A"
+    ],
+    "cd1d1": [
+        "A"
+    ],
+    "cd1d2": [
+        "A"
+    ],
+    "h2_t22": [
+        "A"
+    ],
+    "hfe2": [
+        "A"
+    ],
+    "mica": [
+        "A"
+    ],
+    "micb": [
+        "A"
+    ],
+    "cd3_zeta": [
+        "Y",
+        "Z"
+    ],
+    "cd3_delta": [
+        "V"
+    ],
+    "cd3_epsilon": [
+        "W",
+        "X"
+    ],
+    "cd3_gamma": [
+        "U"
+    ],
+    "nanobody": [
+        "D"
+    ],
+    "transferrin_receptor": [
+        "K"
+    ],
+    "gamma_delta_single_chain_tcr_construct": [
+        "D"
+    ]
 }
